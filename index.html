@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>МоскваДрайв — Каршеринг в Москве</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    .hero-bg { background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.75)), url('https://images.unsplash.com/photo-1492144534652-2f8a5f0f1d9e?ixlib=rb-4.0.3&auto=format&fit=crop&q=80') center/cover no-repeat; }
+    .car-card { transition: all 0.3s ease; }
+    .car-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+    #map { height: 520px; border-radius: 20px; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); }
+    .modal-content { background-color: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 620px; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- НАВИГАЦИЯ -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-car text-3xl text-blue-600"></i>
+        <h1 class="text-2xl font-bold text-gray-900">МоскваДрайв</h1>
+      </div>
+      <div id="nav-auth" class="flex gap-3"></div>
+    </div>
+  </nav>
+
+  <!-- ГЕРО -->
+  <section class="hero-bg h-screen flex items-center text-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-6xl md:text-7xl font-bold mb-4">Автомобиль за 1 минуту</h2>
+      <p class="text-2xl mb-8 max-w-2xl">Каршеринг в Москве. Поминутно и посуточно.</p>
+      <button onclick="document.getElementById('map-section').scrollIntoView({behavior: 'smooth'})" 
+              class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl text-xl font-semibold">Найти авто на карте</button>
+    </div>
+  </section>
+
+  <!-- КАРТА -->
+  <section id="map-section" class="py-20 bg-gray-100">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-5xl font-bold text-center mb-4">Найди автомобиль рядом</h2>
+    <div id="map"></div>
+    </div>
+  </section>
+
+  <!-- ТАРИФЫ -->
+  <section id="tariffs" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-5xl font-bold text-center mb-4">Тарифы</h2>
+      <p class="text-center text-xl text-gray-600 mb-12">Поминутный и посуточный</p>
+      <div class="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+        <div class="bg-gray-50 border-2 border-blue-600 rounded-3xl p-10 text-center car-card">
+          <h3 class="text-3xl font-semibold mb-2">Поминутный</h3>
+          <div class="text-6xl font-bold text-blue-600 mb-1">от 8 ₽</div>
+          <p class="text-gray-600">за минуту</p>
+        </div>
+        <div class="bg-gray-50 border-2 border-gray-300 rounded-3xl p-10 text-center car-card">
+          <h3 class="text-3xl font-semibold mb-2">Посуточный</h3>
+          <div class="text-6xl font-bold text-gray-800 mb-1">от 2 990 ₽</div>
+          <p class="text-gray-600">за сутки</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- АВТОМОБИЛИ -->
+  <section id="cars" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="text-5xl font-bold text-center mb-12">Наши автомобили</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-3xl overflow-hidden car-card">
+          <img src="https://www.cataloge.eu/media/chevrolet/15/pl/chevrolet-camaro-2009-2013.jpg" alt="Chevrolet Camaro" class="w-full h-52 object-cover">
+          <div class="p-6"><h3 class="font-semibold text-2xl">Chevrolet Camaro</h3><p class="text-gray-500">2024 • Жёлтый • Автомат</p><div class="flex justify-between mt-6"><div><span class="text-3xl font-bold">15</span><span class="text-sm text-gray-500"> ₽/мин</span></div><div><span class="text-3xl font-bold">6 990</span><span class="text-sm text-gray-500"> ₽/сутки</span></div></div></div>
+        </div>
+        <div class="bg-white rounded-3xl overflow-hidden car-card">
+          <img src="https://topruscar.ru/assets/images/kt/kt2022_kia-rio_001.jpg" alt="Kia Rio" class="w-full h-52 object-cover">
+          <div class="p-6"><h3 class="font-semibold text-2xl">Kia Rio</h3><p class="text-gray-500">2024 • Белый • Автомат</p><div class="flex justify-between mt-6"><div><span class="text-3xl font-bold">9</span><span class="text-sm text-gray-500"> ₽/мин</span></div><div><span class="text-3xl font-bold">3 290</span><span class="text-sm text-gray-500"> ₽/сутки</span></div></div></div>
+        </div>
+        <div class="bg-white rounded-3xl overflow-hidden car-card">
+          <img src="https://static.wikia.nocookie.net/forzamotorsport/images/9/99/HOR_XB1_Ferrari_FF.png/revision/latest?cb=20191009195354" alt="Ferrari FF" class="w-full h-52 object-cover">
+          <div class="p-6"><h3 class="font-semibold text-2xl">Ferrari FF</h3><p class="text-gray-500">2016 • Красный • Автомат</p><div class="flex justify-between mt-6"><div><span class="text-3xl font-bold">25</span><span class="text-sm text-gray-500"> ₽/мин</span></div><div><span class="text-3xl font-bold">12 990</span><span class="text-sm text-gray-500"> ₽/сутки</span></div></div></div>
+        </div>
+        <div class="bg-white rounded-3xl overflow-hidden car-card">
+          <img src="https://www.masmotors.ru/resources/news/import/18231/image/01_123.jpg.webp" alt="Volkswagen Polo" class="w-full h-52 object-cover">
+          <div class="p-6"><h3 class="font-semibold text-2xl">Volkswagen Polo</h3><p class="text-gray-500">2024 • Серый • Автомат</p><div class="flex justify-between mt-6"><div><span class="text-3xl font-bold">8</span><span class="text-sm text-gray-500"> ₽/мин</span></div><div><span class="text-3xl font-bold">2 990</span><span class="text-sm text-gray-500"> ₽/сутки</span></div></div></div>
+        </div>
+        <div class="bg-white rounded-3xl overflow-hidden car-card">
+          <img src="https://sigma-profi.com/wp-content/uploads/2019/09/toyota-camry-sedan.png-2.jpg" alt="Toyota Camry" class="w-full h-52 object-cover">
+          <div class="p-6"><h3 class="font-semibold text-2xl">Toyota Camry</h3><p class="text-gray-500">2024 • Чёрный • Автомат</p><div class="flex justify-between mt-6"><div><span class="text-3xl font-bold">13</span><span class="text-sm text-gray-500"> ₽/мин</span></div><div><span class="text-3xl font-bold">5 490</span><span class="text-sm text-gray-500"> ₽/сутки</span></div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- МОДАЛЬНЫЕ ОКНА -->
+  <div id="registerModal" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold">Регистрация</h3>
+        <button onclick="hideRegisterModal()" class="text-3xl text-gray-400 hover:text-gray-600">×</button>
+      </div>
+      <form onsubmit="handleRegister(event)">
+        <input type="text" id="name" placeholder="Имя" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl mb-4">
+        <input type="tel" id="phone" placeholder="+7 (___) ___-__-__" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl mb-4">
+        <input type="email" id="email" placeholder="Email" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl mb-4">
+        <input type="password" id="password" placeholder="Пароль" required class="w-full px-4 py-3 border border-gray-300 rounded-2xl mb-6">
+        <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl text-lg font-medium hover:bg-blue-700">Зарегистрироваться</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ЛИЧНЫЙ КАБИНЕТ -->
+  <div id="cabinetModal" class="modal">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold">Личный кабинет</h3>
+        <button onclick="hideCabinetModal()" class="text-3xl text-gray-400 hover:text-gray-600">×</button>
+      </div>
+
+      <!-- Вкладки -->
+      <div id="admin-tabs" class="flex border-b mb-6">
+        <button onclick="switchTab(0)" id="tab0" class="flex-1 py-3 font-medium text-gray-500">Мои брони</button>
+        <button onclick="switchTab(1)" id="tab1" class="flex-1 py-3 font-medium text-gray-500">Все пользователи</button>
+        <button onclick="switchTab(2)" id="tab2" class="flex-1 py-3 font-medium text-gray-500">Все брони</button>
+      </div>
+
+      <div id="cabinet-content" class="min-h-[300px]"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let currentToken = localStorage.getItem('token') || null;
+    let currentUserEmail = localStorage.getItem('userEmail') || null;
+    let isAdmin = false;
+
+    function updateNav() {
+      const nav = document.getElementById('nav-auth');
+      if (currentToken) {
+        nav.innerHTML = `
+          <div onclick="showCabinetModal()" class="flex items-center gap-2 cursor-pointer">
+            <div class="w-8 h-8 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-sm font-medium">👤</div>
+            <div class="text-sm font-semibold">${currentUserEmail}</div>
+          </div>
+          <button onclick="logout()" class="ml-4 text-red-500 hover:text-red-600 text-sm font-medium">Выйти</button>
+        `;
+      } else {
+        nav.innerHTML = `
+          <button onclick="showRegisterModal()" class="bg-white border border-blue-600 text-blue-600 px-5 py-2 rounded-full font-medium hover:bg-blue-50">Регистрация</button>
+          <button onclick="login()" class="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700">Войти</button>
+        `;
+      }
+    }
+
+    async function initMap() {
+      const map = L.map('map').setView([55.7558, 37.6173], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+
+      try {
+        const response = await fetch('/api/cars');
+        const cars = await response.json();
+
+        cars.forEach(car => {
+          const isAvailable = car.status === 'available';
+          const color = isAvailable ? '#22c55e' : '#ef4444';
+
+          const marker = L.circleMarker([car.latitude, car.longitude], {
+            radius: 11, fillColor: color, color: '#ffffff', weight: 3, opacity: 1, fillOpacity: 0.9
+          }).addTo(map);
+
+          let popupHTML = `<b>${car.model}</b><br>${car.color} • ${car.year} г.<br>`;
+
+          if (isAvailable) {
+            popupHTML += `
+              <div class="flex flex-col gap-2 mt-3">
+                <button onclick="bookCar(${car.id}, 'minute')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-3 rounded-2xl text-sm font-medium">Поминутно</button>
+                <button onclick="bookCar(${car.id}, 'day')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-2xl text-sm font-medium">Посуточно</button>
+              </div>`;
+          } else {
+            popupHTML += `<br><span class="text-red-500 font-medium">🚫 Занят</span>`;
+          }
+          marker.bindPopup(popupHTML);
+        });
+      } catch (err) { console.error(err); }
+    }
+
+    function login() {
+      const email = prompt("Введите email:");
+      const password = prompt("Введите пароль:");
+      if (!email || !password) return;
+
+      fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.access_token) {
+          currentToken = data.access_token;
+          currentUserEmail = email;
+          localStorage.setItem('token', currentToken);
+          localStorage.setItem('userEmail', email);
+          isAdmin = email.toLowerCase() === 'admin@mosdriv.ru';
+          updateNav();
+          alert('✅ Вход выполнен успешно!');
+        } else {
+          alert(data.detail || 'Неверный email или пароль');
+        }
+      })
+      .catch(() => alert('Не удалось подключиться к серверу'));
+    }
+
+    function logout() {
+      currentToken = null;
+      currentUserEmail = null;
+      isAdmin = false;
+      localStorage.removeItem('token');
+      localStorage.removeItem('userEmail');
+      updateNav();
+      hideCabinetModal();
+      alert('Вы вышли из аккаунта');
+    }
+
+    async function bookCar(carId, tariffType) {
+      if (!currentToken) { alert("Войдите в аккаунт!"); return; }
+      const name = tariffType === 'minute' ? 'поминутный' : 'посуточный';
+      if (!confirm(`Забронировать автомобиль №${carId} на ${name} тариф?`)) return;
+
+      try {
+        const res = await fetch('/api/book', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+          body: JSON.stringify({ car_id: carId, tariff_type: tariffType })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert(`✅ Забронировано на ${name} тариф!`);
+          initMap();
+        } else {
+          alert(data.detail || 'Автомобиль недоступен');
+        }
+      } catch (e) {
+        alert('Ошибка бронирования');
+      }
+    }
+
+    async function showCabinetModal() {
+      const modal = document.getElementById('cabinetModal');
+      const content = document.getElementById('cabinet-content');
+      content.innerHTML = '<p class="text-center py-12 text-gray-500">Загрузка...</p>';
+      modal.style.display = 'block';
+
+      isAdmin = currentUserEmail && currentUserEmail.toLowerCase() === 'admin@mosdriv.ru';
+
+      if (isAdmin) {
+        switchTab(1); // Админ по умолчанию видит "Все пользователи"
+      } else {
+        switchTab(0);
+      }
+    }
+
+    function switchTab(tab) {
+      document.getElementById('tab0').classList.toggle('border-b-2', tab === 0);
+      document.getElementById('tab0').classList.toggle('border-blue-600', tab === 0);
+      document.getElementById('tab0').classList.toggle('text-blue-600', tab === 0);
+      document.getElementById('tab1').classList.toggle('border-b-2', tab === 1);
+      document.getElementById('tab1').classList.toggle('border-blue-600', tab === 1);
+      document.getElementById('tab1').classList.toggle('text-blue-600', tab === 1);
+      document.getElementById('tab2').classList.toggle('border-b-2', tab === 2);
+      document.getElementById('tab2').classList.toggle('border-blue-600', tab === 2);
+      document.getElementById('tab2').classList.toggle('text-blue-600', tab === 2);
+
+      if (tab === 0) loadMyBookings();
+      else if (tab === 1) loadAllUsers();
+      else if (tab === 2) loadAllBookings();
+    }
+
+    // Мои брони (работает и для обычного пользователя, и для админа)
+    async function loadMyBookings() {
+      const content = document.getElementById('cabinet-content');
+      content.innerHTML = '<p class="text-center py-8">Загрузка ваших бронирований...</p>';
+
+      try {
+        const res = await fetch('/api/my-bookings', {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const bookings = await res.json();
+
+        if (bookings.length === 0) {
+          content.innerHTML = `<p class="text-center py-12 text-gray-500">Пока нет бронирований</p>`;
+          return;
+        }
+
+        let html = `<h4 class="font-semibold mb-4">Ваши брони (${bookings.length})</h4>`;
+        bookings.forEach(b => {
+          const sum = b.total_cost ? parseFloat(b.total_cost).toFixed(2) : '—';
+          const isActive = b.status === 'active';
+
+          html += `
+            <div class="bg-gray-50 p-5 rounded-3xl mb-4">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-semibold">${b.model} — ${b.license_plate}</div>
+                  <div class="text-sm text-gray-500">${new Date(b.start_time).toLocaleString('ru-RU')}</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-3xl font-bold text-blue-600">${sum} ₽</div>
+                </div>
+              </div>
+              ${isActive ? `
+              <div class="mt-4 flex gap-3">
+                <button onclick="payBooking(${b.booking_id})" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-2xl text-sm font-medium">Оплатить</button>
+                <button onclick="cancelBooking(${b.booking_id})" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl text-sm font-medium">Отменить</button>
+              </div>` : `
+              <div class="mt-4 text-center text-green-600 font-medium">✅ ${b.status === 'paid' ? 'Оплачено' : 'Отменено'}</div>`}
+            </div>`;
+        });
+        content.innerHTML = html;
+      } catch (e) {
+        content.innerHTML = `<p class="text-red-500">Ошибка загрузки бронирований</p>`;
+      }
+    }
+
+    async function payBooking(bookingId) {
+      if (!confirm('Оплатить эту бронь?')) return;
+      try {
+        const res = await fetch(`/api/pay-booking?booking_id=${bookingId}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ Бронь успешно оплачена!');
+          loadMyBookings();
+        } else {
+          alert(data.message || 'Ошибка оплаты');
+        }
+      } catch (e) {
+        alert('Ошибка соединения');
+      }
+    }
+
+    async function cancelBooking(bookingId) {
+      if (!confirm('Отменить бронь?')) return;
+      try {
+        const res = await fetch(`/api/cancel-booking?booking_id=${bookingId}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        alert(data.message || 'Бронь отменена');
+        loadMyBookings();
+        initMap();
+      } catch (e) {
+        alert('Не удалось отменить бронь');
+      }
+    }
+
+    // Все пользователи (для админа)
+    async function loadAllUsers() {
+      const content = document.getElementById('cabinet-content');
+      content.innerHTML = '<p class="text-center py-8">Загрузка пользователей...</p>';
+
+      try {
+        const res = await fetch('/api/admin/users', {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const users = await res.json();
+
+        let html = `<h4 class="font-semibold mb-4">Все пользователи (${users.length})</h4>`;
+
+        users.forEach(u => {
+          html += `
+            <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl mb-3">
+              <div>
+                <div class="font-medium">${u.full_name}</div>
+                <div class="text-sm text-gray-500">${u.email}</div>
+              </div>
+              <button onclick="adminDeleteUser(${u.id})" 
+                      class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium">
+                Удалить
+              </button>
+            </div>`;
+        });
+
+        content.innerHTML = html || `<p class="text-center py-8 text-gray-500">Нет пользователей</p>`;
+      } catch (e) {
+        content.innerHTML = `<p class="text-red-500">Ошибка загрузки пользователей</p>`;
+      }
+    }
+
+    async function adminDeleteUser(userId) {
+      if (!confirm('Удалить пользователя навсегда?')) return;
+      try {
+        const res = await fetch(`/api/admin/delete-user/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (res.ok) {
+          alert('Пользователь удалён');
+          loadAllUsers();
+        } else {
+          alert('Не удалось удалить');
+        }
+      } catch (e) {
+        alert('Ошибка соединения');
+      }
+    }
+
+    // Все брони (для админа)
+    async function loadAllBookings() {
+      const content = document.getElementById('cabinet-content');
+      content.innerHTML = '<p class="text-center py-8">Загрузка всех бронирований...</p>';
+
+      try {
+        const res = await fetch('/api/admin/bookings', {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const bookings = await res.json();
+
+        let html = `<h4 class="font-semibold mb-4">Все бронирования (${bookings.length})</h4>`;
+        bookings.forEach(b => {
+          html += `
+            <div class="bg-gray-50 p-4 rounded-2xl mb-3">
+              <div class="font-medium">${b.full_name} (${b.email})</div>
+              <div>${b.model} — ${b.license_plate}</div>
+              <div class="text-sm text-gray-500">${new Date(b.start_time).toLocaleString('ru-RU')}</div>
+            </div>`;
+        });
+        content.innerHTML = html || `<p class="text-center py-8 text-gray-500">Нет бронирований</p>`;
+      } catch (e) {
+        content.innerHTML = `<p class="text-red-500">Ошибка загрузки</p>`;
+      }
+    }
+
+    function hideCabinetModal() {
+      document.getElementById('cabinetModal').style.display = 'none';
+    }
+
+    function showRegisterModal() { 
+      document.getElementById('registerModal').style.display = 'block'; 
+    }
+    function hideRegisterModal() { 
+      document.getElementById('registerModal').style.display = 'none'; 
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      const allowedDomains = ['@mail.ru', '@gmail.com', '@yandex.ru', '@mosdriv.ru'];
+      if (!allowedDomains.some(d => email.endsWith(d))) {
+        alert('❌ Разрешены только почты: @mail.ru, @gmail.com, @yandex.ru, @mosdriv.ru');
+        return;
+      }
+      const phoneRegex = /^\+7\d{10}$/;
+      if (!phoneRegex.test(phone)) {
+        alert('❌ Номер должен начинаться с +7 и содержать 11 цифр');
+        return;
+      }
+      if (password.length < 6) {
+        alert('❌ Пароль должен быть не менее 6 символов');
+        return;
+      }
+
+      try {
+        const res = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ full_name: name, phone, email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('✅ Регистрация прошла успешно!');
+          hideRegisterModal();
+        } else {
+          alert(data.detail || 'Ошибка регистрации');
+        }
+      } catch (err) {
+        alert('Не удалось подключиться к серверу');
+      }
+    }
+
+    window.onload = () => {
+      updateNav();
+      initMap();
+    };
+  </script>
+</body>
+</html>
